@@ -12,6 +12,204 @@
         }
     ],
     "paths": {
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Inicia sesión con correo electrónico y contraseña",
+                "description": "Valida que el usuario exista en Firebase Firestore y que la contraseña sea correcta. Si las credenciales son válidas, genera un token de acceso temporal (Bearer) que debe enviarse en el header Authorization de las siguientes peticiones protegidas.",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inicio de sesión exitoso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthLoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales incorrectas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación de los datos enviados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiados intentos de inicio de sesión",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Cierra la sesión del usuario autenticado",
+                "description": "Invalida el token de acceso actual, eliminándolo del almacenamiento en Firebase Firestore. El cliente debe descartar el token localmente tras la respuesta.",
+                "operationId": "authLogout",
+                "responses": {
+                    "200": {
+                        "description": "Sesión cerrada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiSuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado o sesión expirada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Obtiene el usuario autenticado a partir del token actual",
+                "description": "Permite al frontend validar y mantener la sesión activa tras recargar la aplicación, comprobando que el token Bearer siga siendo válido.",
+                "operationId": "authMe",
+                "responses": {
+                    "200": {
+                        "description": "Sesión activa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthMeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado o sesión expirada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Solicita la recuperación de contraseña",
+                "description": "Valida que el correo electrónico exista en Firebase Firestore. Si existe, genera una nueva contraseña temporal, la almacena hasheada y la envía al correo electrónico registrado mediante una plantilla HTML. Si el correo no existe, devuelve un mensaje indicándolo sin revelar más información sensible.",
+                "operationId": "authForgotPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgotPasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Credenciales enviadas al correo electrónico registrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiSuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No existe una cuenta asociada al correo electrónico",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación de los datos enviados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Demasiadas solicitudes de recuperación de contraseña",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "tags": [
@@ -64,12 +262,2181 @@
                     }
                 }
             }
+        },
+        "/perfiles": {
+            "get": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Lista perfiles con paginación, búsqueda y ordenamiento",
+                "description": "Devuelve un listado paginado de perfiles. Permite buscar por código o nombre. Requiere el permiso \"consultar\" en la sección \"perfiles\".",
+                "operationId": "perfilesIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort_field",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at",
+                            "enum": [
+                                "id",
+                                "name",
+                                "created_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PerfilListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Crea un nuevo perfil",
+                "description": "Crea un perfil validando que el nombre sea único y define la matriz de permisos por sección. Requiere el permiso \"crear\" en la sección \"perfiles\".",
+                "operationId": "perfilesStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StorePerfilRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Perfil creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PerfilResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para crear perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/perfiles/{perfil}": {
+            "get": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Obtiene el detalle de un perfil",
+                "description": "Devuelve la información completa de un perfil, incluyendo la matriz de secciones y permisos asociada. Requiere el permiso \"consultar\" en la sección \"perfiles\".",
+                "operationId": "perfilesShow",
+                "parameters": [
+                    {
+                        "name": "perfil",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de perfil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PerfilResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Perfil no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Actualiza un perfil existente",
+                "description": "Actualiza el nombre y la matriz de permisos por sección de un perfil. Requiere el permiso \"editar\" en la sección \"perfiles\".",
+                "operationId": "perfilesUpdate",
+                "parameters": [
+                    {
+                        "name": "perfil",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePerfilRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Perfil actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PerfilResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para editar perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Perfil no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Elimina un perfil",
+                "description": "Elimina físicamente el perfil de Firebase Firestore. Requiere el permiso \"eliminar\" en la sección \"perfiles\".",
+                "operationId": "perfilesDestroy",
+                "parameters": [
+                    {
+                        "name": "perfil",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Perfil eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiSuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para eliminar perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Perfil no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/perfiles/export/pdf": {
+            "get": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Exporta el listado de perfiles a PDF",
+                "description": "Genera un PDF con Código, Nombre y Fecha de creación. Requiere el permiso \"consultar\" en la sección \"perfiles\".",
+                "operationId": "perfilesExportPdf",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo PDF",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/perfiles/export/excel": {
+            "get": {
+                "tags": [
+                    "Perfiles"
+                ],
+                "summary": "Exporta el listado de perfiles a Excel",
+                "description": "Genera un archivo XLSX con Código, Nombre y Fecha de creación. Requiere el permiso \"consultar\" en la sección \"perfiles\".",
+                "operationId": "perfilesExportExcel",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel",
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar perfiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/productos": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Lista productos con paginación, búsqueda y ordenamiento",
+                "description": "Devuelve un listado paginado de productos. Permite buscar por código o nombre. Disponible para cualquier usuario autenticado.",
+                "operationId": "productosIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort_field",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at",
+                            "enum": [
+                                "id",
+                                "name",
+                                "precio",
+                                "created_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de productos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductoListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Crea un nuevo producto",
+                "description": "Crea un producto y registra el alta en la bitácora de auditoría. Requiere que el usuario autenticado tenga el permiso de crear en la sección productos.",
+                "operationId": "productosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreProductoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Producto creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos para crear productos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/productos/{producto}": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Obtiene el detalle de un producto",
+                "description": "Devuelve la información completa de un producto. Disponible para cualquier usuario autenticado.",
+                "operationId": "productosShow",
+                "parameters": [
+                    {
+                        "name": "producto",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de producto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Actualiza un producto existente",
+                "description": "Actualiza un producto capturando la información anterior antes de aplicar los cambios y registra la edición en la bitácora de auditoría. Requiere que el usuario autenticado tenga el permiso de editar en la sección productos.",
+                "operationId": "productosUpdate",
+                "parameters": [
+                    {
+                        "name": "producto",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProductoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Producto actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductoResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos para editar productos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Elimina un producto",
+                "description": "Elimina físicamente el producto de Firebase Firestore. Requiere que el usuario autenticado tenga el permiso de eliminar en la sección productos.",
+                "operationId": "productosDestroy",
+                "parameters": [
+                    {
+                        "name": "producto",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Producto eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiSuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos para eliminar productos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/productos/export/pdf": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Exporta el listado de productos a PDF",
+                "description": "Genera un PDF con título, fecha de generación y una tabla con Código, Nombre, Precio y Fecha de creación.",
+                "operationId": "productosExportPdf",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo PDF",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/productos/export/excel": {
+            "get": {
+                "tags": [
+                    "Productos"
+                ],
+                "summary": "Exporta el listado de productos a Excel",
+                "description": "Genera un archivo XLSX con las columnas Código, Nombre, Precio y Fecha de creación.",
+                "operationId": "productosExportExcel",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel",
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/system/status": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Consulta si el sistema ya cuenta con usuarios registrados",
+                "description": "Endpoint público (no requiere autenticación) utilizado por el frontend para decidir si debe mostrarse el formulario público de Alta de Usuario inicial (sistema sin usuarios) o la pantalla de Login (sistema ya inicializado).",
+                "operationId": "systemStatus",
+                "responses": {
+                    "200": {
+                        "description": "Estado del sistema obtenido correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Estado del sistema obtenido correctamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "initialized": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": null,
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "examples": {
+                                    "sin_usuarios": {
+                                        "summary": "El sistema no tiene ningún usuario registrado",
+                                        "value": {
+                                            "success": true,
+                                            "status": "success",
+                                            "message": "Estado del sistema obtenido correctamente.",
+                                            "data": {
+                                                "initialized": false
+                                            },
+                                            "errors": null
+                                        }
+                                    },
+                                    "con_usuarios": {
+                                        "summary": "El sistema ya tiene al menos un usuario registrado",
+                                        "value": {
+                                            "success": true,
+                                            "status": "success",
+                                            "message": "Estado del sistema obtenido correctamente.",
+                                            "data": {
+                                                "initialized": true
+                                            },
+                                            "errors": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/usuarios": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Lista usuarios con paginación, búsqueda y ordenamiento",
+                "description": "Devuelve un listado paginado de usuarios. Permite buscar por código, nombre o correo electrónico y ordenar por cualquiera de las columnas visibles. Requiere el permiso \"consultar\" en la sección \"usuarios\".",
+                "operationId": "usuariosIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort_field",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at",
+                            "enum": [
+                                "id",
+                                "name",
+                                "email",
+                                "created_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_direction",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Crea un nuevo usuario",
+                "description": "Crea un usuario con su fotografía de perfil (almacenada en Firebase Storage), valida que el correo sea único y registra el alta en la bitácora de auditoría. Si el sistema no tiene ningún usuario registrado, este endpoint es público y el usuario creado se registra automáticamente con el perfil Administrador (modo de inicialización del sistema). Una vez que existe al menos un usuario, requiere autenticación y el permiso \"crear\" en la sección \"usuarios\".",
+                "operationId": "usuariosStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreUsuarioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado (el sistema ya tiene usuarios registrados)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permisos para crear usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/usuarios/{usuario}": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Obtiene el detalle de un usuario",
+                "description": "Devuelve la información completa de un usuario, incluyendo los perfiles asignados y las secciones a las que tiene acceso (agregadas de todos sus perfiles). Requiere el permiso \"consultar\" en la sección \"usuarios\".",
+                "operationId": "usuariosShow",
+                "parameters": [
+                    {
+                        "name": "usuario",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle de usuario",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Actualiza un usuario existente",
+                "description": "Actualiza los datos de un usuario. Captura la información anterior antes de aplicar los cambios y registra la edición en la bitácora de auditoría con el detalle antes/después. Al enviarse como multipart/form-data, debe incluir el campo _method=PUT. Requiere el permiso \"editar\" en la sección \"usuarios\".",
+                "operationId": "usuariosUpdate",
+                "parameters": [
+                    {
+                        "name": "usuario",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUsuarioRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuario actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UsuarioResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para editar usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Elimina un usuario",
+                "description": "Elimina físicamente el usuario de Firebase Firestore. Requiere el permiso \"eliminar\" en la sección \"usuarios\".",
+                "operationId": "usuariosDestroy",
+                "parameters": [
+                    {
+                        "name": "usuario",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuario eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiSuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para eliminar usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/usuarios/export/pdf": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Exporta el listado de usuarios a PDF",
+                "description": "Genera un PDF con título, fecha de generación y una tabla con Código, Usuario, Nombre y Fecha de creación. Requiere el permiso \"consultar\" en la sección \"usuarios\".",
+                "operationId": "usuariosExportPdf",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo PDF",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/usuarios/export/excel": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Exporta el listado de usuarios a Excel",
+                "description": "Genera un archivo XLSX con las columnas Código, Usuario, Nombre y Fecha de creación. Requiere el permiso \"consultar\" en la sección \"usuarios\".",
+                "operationId": "usuariosExportExcel",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Archivo Excel",
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+                        }
+                    },
+                    "403": {
+                        "description": "Sin permiso para consultar usuarios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AuthLoginResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Inicio de sesión exitoso."
+                    },
+                    "data": {
+                        "properties": {
+                            "user": {
+                                "$ref": "#/components/schemas/User"
+                            },
+                            "token": {
+                                "type": "string",
+                                "example": "5f3c9b1e8a7d6c2f4b0a9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b"
+                            },
+                            "token_type": {
+                                "type": "string",
+                                "example": "Bearer"
+                            },
+                            "expires_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2026-08-05T13:00:00+00:00"
+                            },
+                            "permisos": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SeccionPermiso"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "AuthMeResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Sesión activa."
+                    },
+                    "data": {
+                        "properties": {
+                            "user": {
+                                "$ref": "#/components/schemas/User"
+                            },
+                            "permisos": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SeccionPermiso"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "SeccionPermiso": {
+                "properties": {
+                    "seccion": {
+                        "type": "string",
+                        "example": "productos"
+                    },
+                    "crear": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "consultar": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "editar": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "eliminar": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "ApiSuccessResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Operación exitosa."
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ApiErrorResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "error"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Las credenciales proporcionadas son incorrectas."
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ApiValidationErrorResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "error"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Validation error"
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "email": [
+                                "El correo electrónico es obligatorio."
+                            ]
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PerfilListResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Perfiles obtenidos correctamente."
+                    },
+                    "data": {
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Perfil"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PerfilResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Perfil creado correctamente."
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Perfil"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProductoListResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Productos obtenidos correctamente."
+                    },
+                    "data": {
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Producto"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProductoResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Producto creado correctamente."
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Producto"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "properties": {
+                    "page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "UsuarioListResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Usuarios obtenidos correctamente."
+                    },
+                    "data": {
+                        "properties": {
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Usuario"
+                                }
+                            },
+                            "pagination": {
+                                "$ref": "#/components/schemas/Pagination"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UsuarioResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Usuario creado correctamente."
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Usuario"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UsuarioDetailResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "success"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Detalle de usuario obtenido correctamente."
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/UsuarioDetail"
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ForgotPasswordRequest": {
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "Secret123",
+                        "minLength": 6
+                    }
+                },
+                "type": "object"
+            },
+            "StorePerfilRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Administrador"
+                    },
+                    "secciones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "seccion": {
+                                    "type": "string",
+                                    "example": "usuarios"
+                                },
+                                "crear": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "consultar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "editar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "eliminar": {
+                                    "type": "boolean",
+                                    "example": false
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "UpdatePerfilRequest": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Administrador"
+                    },
+                    "secciones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "seccion": {
+                                    "type": "string",
+                                    "example": "usuarios"
+                                },
+                                "crear": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "consultar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "editar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "eliminar": {
+                                    "type": "boolean",
+                                    "example": false
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "StoreProductoRequest": {
+                "required": [
+                    "name",
+                    "precio"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Teclado mecánico"
+                    },
+                    "precio": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 599.99
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProductoRequest": {
+                "required": [
+                    "name",
+                    "precio"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Teclado mecánico"
+                    },
+                    "precio": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 649.99
+                    }
+                },
+                "type": "object"
+            },
+            "StoreUsuarioRequest": {
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "foto"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "Secret123!"
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "+521234567890",
+                        "nullable": true
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "perfiles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateUsuarioRequest": {
+                "required": [
+                    "name",
+                    "email"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "NuevoSecret123!",
+                        "nullable": true
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "+521234567890",
+                        "nullable": true
+                    },
+                    "foto": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    },
+                    "perfiles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "f3b1c2d4e5f6"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    }
+                },
+                "type": "object"
+            },
+            "Perfil": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "a1b2c3d4e5f6"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Administrador"
+                    },
+                    "secciones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "seccion": {
+                                    "type": "string",
+                                    "example": "usuarios"
+                                },
+                                "crear": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "consultar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "editar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "eliminar": {
+                                    "type": "boolean",
+                                    "example": false
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-08-05T13:00:00+00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "Producto": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "a1b2c3d4e5f6"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Teclado mecánico"
+                    },
+                    "precio": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 599.99
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-08-05T13:00:00+00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "UsuarioDetail": {
+                "properties": {
+                    "usuario": {
+                        "$ref": "#/components/schemas/Usuario"
+                    },
+                    "perfiles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Perfil"
+                        }
+                    },
+                    "secciones": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "seccion": {
+                                    "type": "string",
+                                    "example": "usuarios"
+                                },
+                                "crear": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "consultar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "editar": {
+                                    "type": "boolean",
+                                    "example": true
+                                },
+                                "eliminar": {
+                                    "type": "boolean",
+                                    "example": false
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Usuario": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "f3b1c2d4e5f6"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Juan Pérez"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "juan.perez@example.com"
+                    },
+                    "telefono": {
+                        "type": "string",
+                        "example": "+521234567890",
+                        "nullable": true
+                    },
+                    "foto_url": {
+                        "type": "string",
+                        "example": "https://storage.googleapis.com/bucket/usuarios/abc.jpg"
+                    },
+                    "perfiles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-08-05T13:00:00+00:00"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            }
         }
     },
     "tags": [
         {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
             "name": "Health",
             "description": "Health"
+        },
+        {
+            "name": "Perfiles",
+            "description": "Perfiles"
+        },
+        {
+            "name": "Productos",
+            "description": "Productos"
+        },
+        {
+            "name": "System",
+            "description": "System"
+        },
+        {
+            "name": "Usuarios",
+            "description": "Usuarios"
         }
     ]
 }

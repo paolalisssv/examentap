@@ -1,6 +1,8 @@
 <?php
 
 use App\Helpers\ApiResponse;
+use App\Http\Middleware\AuthenticateFirestoreToken;
+use App\Http\Middleware\AuthorizePermission;
 use App\Http\Middleware\ForceJsonResponseMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(prepend: [
             ForceJsonResponseMiddleware::class,
+        ]);
+
+        $middleware->alias([
+            'auth.token' => AuthenticateFirestoreToken::class,
+            'permission' => AuthorizePermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

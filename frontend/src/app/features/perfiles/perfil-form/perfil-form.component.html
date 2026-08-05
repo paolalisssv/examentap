@@ -1,0 +1,55 @@
+<section class="page">
+  <div class="page-header">
+    <h1>{{ isEditMode() ? 'Editar Perfil' : 'Nuevo Perfil' }}</h1>
+    <a routerLink="/perfiles" class="btn-secondary">Volver a Perfiles</a>
+  </div>
+
+  <form class="form-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (errorMessage()) {
+      <div class="alert alert--error" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <div class="form-field">
+      <label for="codigo">Código de perfil</label>
+      <input id="codigo" type="text" [value]="perfilId() ?? '(autogenerado)'" readonly />
+    </div>
+
+    <div class="form-field">
+      <label for="name">Nombre del perfil</label>
+      <input id="name" type="text" formControlName="name" />
+      @if (name.invalid && name.touched) {
+        <span class="field-error">El nombre del perfil es obligatorio.</span>
+      }
+    </div>
+
+    <fieldset class="form-field" formGroupName="secciones">
+      <legend>Secciones y permisos</legend>
+      <table class="permisos-table">
+        <thead>
+          <tr>
+            <th>Sección</th>
+            <th>Crear</th>
+            <th>Consultar</th>
+            <th>Editar</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (seccion of secciones; track seccion) {
+            <tr [formGroupName]="seccion">
+              <td>{{ seccionLabels[seccion] }}</td>
+              <td><input type="checkbox" formControlName="crear" /></td>
+              <td><input type="checkbox" formControlName="consultar" /></td>
+              <td><input type="checkbox" formControlName="editar" /></td>
+              <td><input type="checkbox" formControlName="eliminar" /></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </fieldset>
+
+    <button type="submit" class="submit-button" [disabled]="loading()">
+      {{ loading() ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </form>
+</section>

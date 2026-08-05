@@ -1,0 +1,29 @@
+@if (open) {
+  <div
+    class="modal-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="Cerrar"
+    (click)="closed.emit()"
+    (keydown.enter)="closed.emit()"
+    (keydown.space)="closed.emit()"
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2>{{ title }}</h2>
+        <button type="button" class="modal-close" (click)="closed.emit()" aria-label="Cerrar">
+          ×
+        </button>
+      </div>
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </div>
+}

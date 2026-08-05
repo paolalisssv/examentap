@@ -1,0 +1,72 @@
+<div class="data-table">
+  <div class="data-table-toolbar">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar..."
+      (input)="onSearchInput($any($event.target).value)"
+    />
+  </div>
+
+  <div class="data-table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          @for (column of columns; track column.field) {
+            <th [class.sortable]="column.sortable" (click)="sortBy(column)">
+              {{ column.label }}
+              @if (column.sortable && sortField === column.field) {
+                <span class="sort-indicator">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              }
+            </th>
+          }
+          <th class="actions-column">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          <tr>
+            <td [attr.colspan]="columns.length + 1" class="empty-state">Cargando...</td>
+          </tr>
+        } @else if (rows.length === 0) {
+          <tr>
+            <td [attr.colspan]="columns.length + 1" class="empty-state">Sin resultados</td>
+          </tr>
+        } @else {
+          @for (row of rows; track row.id) {
+            <tr>
+              @for (column of columns; track column.field) {
+                <td>{{ cellValue(row, column) }}</td>
+              }
+              <td class="actions-column">
+                <button type="button" class="action-button" (click)="view.emit(row)">Ver</button>
+                @if (canEdit) {
+                  <button type="button" class="action-button" (click)="edit.emit(row)">
+                    Editar
+                  </button>
+                }
+                @if (canDelete) {
+                  <button
+                    type="button"
+                    class="action-button action-button--danger"
+                    (click)="delete.emit(row)"
+                  >
+                    Eliminar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="data-table-pagination">
+    <button type="button" [disabled]="page <= 1" (click)="goToPage(page - 1)">Anterior</button>
+    <span>Página {{ page }} de {{ totalPages }} ({{ total }} registros)</span>
+    <button type="button" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">
+      Siguiente
+    </button>
+  </div>
+</div>

@@ -1,0 +1,90 @@
+<section class="page">
+  <div class="page-header">
+    <h1>Perfiles</h1>
+    <div class="page-actions">
+      <button type="button" class="btn-secondary" (click)="exportPdf()">Descargar PDF</button>
+      <button type="button" class="btn-secondary" (click)="exportExcel()">Descargar Excel</button>
+      @if (authService.tienePermiso('perfiles', 'crear')) {
+        <a routerLink="/perfiles/nuevo" class="btn-primary">Nuevo Perfil</a>
+      }
+    </div>
+  </div>
+
+  @if (successMessage()) {
+    <div class="alert-success" role="status">{{ successMessage() }}</div>
+  }
+
+  <app-data-table
+    [columns]="columns"
+    [rows]="rows()"
+    [total]="total()"
+    [page]="page()"
+    [pageSize]="pageSize"
+    [sortField]="sortField()"
+    [sortDirection]="sortDirection()"
+    [loading]="loading()"
+    [canEdit]="authService.tienePermiso('perfiles', 'editar')"
+    [canDelete]="authService.tienePermiso('perfiles', 'eliminar')"
+    (searchChange)="onSearch($event)"
+    (sortChange)="onSort($event)"
+    (pageChange)="onPageChange($event)"
+    (view)="onView($event)"
+    (edit)="onEdit($event)"
+    (delete)="onDeleteRequest($event)"
+  ></app-data-table>
+</section>
+
+<app-confirm-dialog
+  [open]="deleteTarget() !== null"
+  title="Eliminar perfil"
+  [message]="
+    '¿Deseas eliminar el perfil ' +
+    (deleteTarget()?.name ?? '') +
+    '? Esta acción no se puede deshacer.'
+  "
+  (confirm)="confirmDelete()"
+  (dismiss)="cancelDelete()"
+></app-confirm-dialog>
+
+<app-modal [open]="detailOpen()" title="Detalle de perfil" (closed)="closeDetail()">
+  @if (detail(); as data) {
+    <div class="detail">
+      <dl>
+        <dt>Código</dt>
+        <dd>{{ data.id }}</dd>
+        <dt>Nombre</dt>
+        <dd>{{ data.name }}</dd>
+        <dt>Fecha de creación</dt>
+        <dd>{{ formatDate(data.createdAt) }}</dd>
+      </dl>
+
+      <h3>Secciones</h3>
+      @if (data.secciones.length === 0) {
+        <p class="empty-text">Sin secciones configuradas.</p>
+      } @else {
+        <table class="secciones-table">
+          <thead>
+            <tr>
+              <th>Sección</th>
+              <th>Crear</th>
+              <th>Consultar</th>
+              <th>Editar</th>
+              <th>Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (seccion of data.secciones; track seccion.seccion) {
+              <tr>
+                <td>{{ seccion.seccion }}</td>
+                <td>{{ seccion.crear ? 'Sí' : 'No' }}</td>
+                <td>{{ seccion.consultar ? 'Sí' : 'No' }}</td>
+                <td>{{ seccion.editar ? 'Sí' : 'No' }}</td>
+                <td>{{ seccion.eliminar ? 'Sí' : 'No' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+</app-modal>

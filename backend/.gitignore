@@ -1,6 +1,7 @@
 /.phpunit.cache
 /public/storage
 /storage/*.key
+/storage/app/firebase
 /storage/pail
 /vendor
 .env

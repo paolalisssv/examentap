@@ -13,6 +13,12 @@ use OpenApi\Attributes as OA;
     url: L5_SWAGGER_CONST_HOST,
     description: 'API server'
 )]
+#[OA\SecurityScheme(
+    securityScheme: 'bearerAuth',
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'Token'
+)]
 class OpenApiInfo
 {
 }

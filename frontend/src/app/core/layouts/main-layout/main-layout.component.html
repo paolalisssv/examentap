@@ -1,1 +1,22 @@
+<header class="app-header">
+  <div class="app-header-left">
+    <span class="app-title">ExamenTAP</span>
+    <nav class="app-nav">
+      @if (authService.tienePermiso('usuarios', 'consultar')) {
+        <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+      }
+      @if (authService.tienePermiso('perfiles', 'consultar')) {
+        <a routerLink="/perfiles" routerLinkActive="active">Perfiles</a>
+      }
+      <a routerLink="/productos" routerLinkActive="active">Productos</a>
+    </nav>
+  </div>
+  @if (currentUser(); as user) {
+    <div class="app-user">
+      <span>{{ user.name }}</span>
+      <button type="button" (click)="logout()">Cerrar sesión</button>
+    </div>
+  }
+</header>
+
 <router-outlet></router-outlet>

@@ -1,0 +1,30 @@
+@if (open) {
+  <div
+    class="dialog-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="Cerrar"
+    (click)="dismiss.emit()"
+    (keydown.enter)="dismiss.emit()"
+    (keydown.space)="dismiss.emit()"
+  >
+    <div
+      class="dialog"
+      role="alertdialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <h2>{{ title }}</h2>
+      <p>{{ message }}</p>
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" (click)="dismiss.emit()">
+          {{ cancelLabel }}
+        </button>
+        <button type="button" class="btn-danger" (click)="confirm.emit()">
+          {{ confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
