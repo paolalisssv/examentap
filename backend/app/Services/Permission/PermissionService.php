@@ -42,6 +42,8 @@ class PermissionService
                     continue;
                 }
 
+                // Un usuario con varios perfiles obtiene el permiso más permisivo entre
+                // todos ellos: basta que uno solo lo otorgue para que quede habilitado.
                 foreach (['crear', 'consultar', 'editar', 'eliminar'] as $permiso) {
                     $result[$seccion][$permiso] = $result[$seccion][$permiso] || (bool) ($entry[$permiso] ?? false);
                 }

@@ -29,6 +29,8 @@ class UsuarioService
     ) {
     }
 
+    // Firestore no soporta búsqueda ni orden dinámico del lado del servidor para este
+    // caso, así que se trae toda la colección y se filtra/ordena/pagina en memoria.
     public function paginate(?string $search, string $sortField, string $sortDirection, int $page, int $perPage): array
     {
         $items = $this->usuarios->all();
@@ -97,6 +99,8 @@ class UsuarioService
     public function create(array $data, UploadedFile $foto, ?AuthenticatedUserDTO $actor, bool $isBootstrap = false): UsuarioDTO
     {
         if ($isBootstrap) {
+            // El primer usuario del sistema (sin sesión previa) siempre queda
+            // asociado a un perfil "Administrador" con permisos totales.
             $perfiles = [$this->ensureAdministradorPerfil()];
         } else {
             $perfiles = $data['perfiles'] ?? [];
@@ -180,6 +184,7 @@ class UsuarioService
         }
     }
 
+    // Evita que el hash de la contraseña quede almacenado en la bitácora de auditoría.
     private function sanitize(array $fields): array
     {
         unset($fields['password']);

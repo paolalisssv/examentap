@@ -9,6 +9,8 @@ export const guestGuard: CanActivateFn = () => {
   const systemService = inject(SystemService);
   const router = inject(Router);
 
+  // Mientras el sistema no tenga ningún usuario, toda ruta de invitado redirige
+  // a la configuración inicial en vez de mostrar el login.
   if (systemService.initialized() === false) {
     return router.createUrlTree(['/configuracion-inicial']);
   }

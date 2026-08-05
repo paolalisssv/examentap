@@ -21,6 +21,7 @@ class FirestoreUnique implements ValidationRule
             return;
         }
 
+        // Al editar, el propio registro no debe marcarse como duplicado de sí mismo.
         if ($this->ignoreId !== null && $existing['id'] === $this->ignoreId) {
             return;
         }

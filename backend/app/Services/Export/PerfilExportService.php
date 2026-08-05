@@ -39,6 +39,8 @@ class PerfilExportService
 
         $writer = new Xlsx($spreadsheet);
 
+        // Se escribe directo al stream de la respuesta en lugar de generar el archivo
+        // completo en memoria antes de enviarlo.
         return new StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
         }, 200, [

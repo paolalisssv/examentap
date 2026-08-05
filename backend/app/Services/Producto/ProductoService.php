@@ -17,6 +17,8 @@ class ProductoService
     ) {
     }
 
+    // Firestore no soporta búsqueda ni orden dinámico del lado del servidor para este
+    // caso, así que se trae toda la colección y se filtra/ordena/pagina en memoria.
     public function paginate(?string $search, string $sortField, string $sortDirection, int $page, int $perPage): array
     {
         $items = $this->productos->all();

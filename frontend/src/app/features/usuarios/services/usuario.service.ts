@@ -55,6 +55,8 @@ export class UsuarioService {
   }
 
   update(id: string, payload: UsuarioFormPayload): Observable<Usuario> {
+    // Se envía como POST con _method=PUT porque los navegadores no soportan
+    // adjuntar archivos (multipart/form-data) en peticiones PUT reales.
     const formData = this.toFormData(payload);
     formData.set('_method', 'PUT');
 

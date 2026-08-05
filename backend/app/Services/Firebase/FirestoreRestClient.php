@@ -6,6 +6,9 @@ use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+// Habla directo con la API REST de Firestore (en vez del cliente gRPC oficial),
+// por lo que debe codificar/decodificar manualmente el formato de valores tipados
+// de Firestore (stringValue, integerValue, mapValue, etc.).
 class FirestoreRestClient
 {
     private readonly string $baseUri;
@@ -23,6 +26,8 @@ class FirestoreRestClient
         try {
             $response = $this->firebase->apiClient()->get("{$this->baseUri}/{$collection}/{$documentId}");
         } catch (ClientException $exception) {
+            // Firestore responde 404 cuando el documento no existe; se trata como
+            // "no encontrado" en vez de propagar el error.
             if ($exception->getResponse()?->getStatusCode() === 404) {
                 return null;
             }
@@ -77,6 +82,8 @@ class FirestoreRestClient
 
     public function update(string $collection, string $documentId, array $fields): void
     {
+        // El updateMask limita el PATCH a los campos enviados; sin él, Firestore
+        // reemplazaría el documento completo y borraría los campos no incluidos.
         $mask = collect(array_keys($fields))
             ->map(fn (string $field) => 'updateMask.fieldPaths='.urlencode($field))
             ->implode('&');
@@ -91,6 +98,7 @@ class FirestoreRestClient
         try {
             $this->firebase->apiClient()->delete("{$this->baseUri}/{$collection}/{$documentId}");
         } catch (ClientException $exception) {
+            // Un documento ya inexistente no debe considerarse un fallo del delete.
             if ($exception->getResponse()?->getStatusCode() !== 404) {
                 throw $exception;
             }

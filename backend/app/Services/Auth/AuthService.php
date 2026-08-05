@@ -25,6 +25,8 @@ class AuthService
     {
         $user = $this->users->findByEmail($email);
 
+        // Se lanza la misma excepción para email inexistente y contraseña incorrecta,
+        // evitando así revelar si un correo está registrado (user enumeration).
         if ($user === null || ! Hash::check($password, $user['password'])) {
             throw new InvalidCredentialsException();
         }
@@ -71,6 +73,8 @@ class AuthService
             throw new NotFoundException('No existe una cuenta asociada a este correo electrónico.');
         }
 
+        // No se usa un flujo de token de reseteo: se genera y envía directamente una
+        // contraseña temporal, dejando la sesión anterior inválida de inmediato.
         $temporaryPassword = Str::password(14);
 
         $this->users->updatePassword($user['id'], Hash::make($temporaryPassword));
@@ -78,6 +82,8 @@ class AuthService
         Mail::to($user['email'])->send(new PasswordRecoveryMail($user['name'], $temporaryPassword));
     }
 
+    // Solo el hash del token se persiste; el valor en texto plano únicamente
+    // se entrega al cliente, así una fuga de la base de datos no expone tokens usables.
     private function hashToken(string $token): string
     {
         return hash('sha256', $token);

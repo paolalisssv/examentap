@@ -9,6 +9,8 @@ export const authGuard: CanActivateFn = (_route, state) => {
   const systemService = inject(SystemService);
   const router = inject(Router);
 
+  // Mientras el sistema no tenga ningún usuario, toda ruta protegida redirige
+  // a la configuración inicial en vez de al login.
   if (systemService.initialized() === false) {
     return router.createUrlTree(['/configuracion-inicial']);
   }

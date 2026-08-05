@@ -19,6 +19,8 @@ export class SystemService {
     return this.api.get<SystemStatus>(SYSTEM_ENDPOINTS.status).pipe(
       map((response) => response.data?.initialized ?? true),
       tap((initialized) => this.initializedSignal.set(initialized)),
+      // Si la consulta falla, se asume que el sistema ya está inicializado para
+      // no exponer por error la pantalla pública de configuración inicial.
       catchError(() => {
         this.initializedSignal.set(true);
 

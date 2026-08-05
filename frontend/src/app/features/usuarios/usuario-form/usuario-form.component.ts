@@ -39,6 +39,9 @@ export class UsuarioFormComponent implements OnInit {
     private readonly router: Router,
     private readonly route: ActivatedRoute
   ) {
+    // Cuando el sistema no tiene usuarios, esta ruta se usa para crear al primer
+    // administrador sin sesión: se omite el selector de perfiles y, al terminar,
+    // se redirige al login en vez de al listado de usuarios.
     this.isBootstrap = this.route.snapshot.data['bootstrap'] === true;
 
     this.form = this.formBuilder.nonNullable.group({
@@ -61,6 +64,8 @@ export class UsuarioFormComponent implements OnInit {
       this.usuarioId.set(id);
       this.loadUsuario(id);
     } else {
+      // La contraseña solo es obligatoria al crear; al editar puede dejarse vacía
+      // para conservar la contraseña actual del usuario.
       this.form.controls.password.addValidators([
         Validators.required,
         Validators.pattern(PASSWORD_PATTERN)
@@ -124,6 +129,8 @@ export class UsuarioFormComponent implements OnInit {
   }
 
   submit(): void {
+    // La foto es obligatoria solo al crear; al editar se conserva la foto actual
+    // si no se selecciona una nueva.
     const requiresFoto = !this.isEditMode() && !this.selectedFoto;
 
     if (this.form.invalid || requiresFoto) {

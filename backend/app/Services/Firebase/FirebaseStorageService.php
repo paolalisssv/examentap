@@ -17,6 +17,8 @@ class FirebaseStorageService implements FileStorageInterface
 
         $stream = fopen($file->getRealPath(), 'r');
 
+        // Se sube con ACL pública para poder devolver una URL directa y accesible
+        // sin necesidad de firmar la petición.
         $bucket->upload($stream, [
             'name' => $path,
             'predefinedAcl' => 'publicRead',

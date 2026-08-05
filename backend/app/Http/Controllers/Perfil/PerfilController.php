@@ -182,6 +182,8 @@ class PerfilController extends Controller
     )]
     public function exportPdf(Request $request): Response
     {
+        // Se reutiliza paginate() con PHP_INT_MAX como per_page para obtener el
+        // listado completo (sin paginar) que requiere la exportación.
         $result = $this->perfilService->paginate(
             $request->string('search')->toString() ?: null,
             'created_at',

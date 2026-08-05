@@ -61,6 +61,7 @@ export class DataTableComponent<T extends { id: string }> {
     this.pageChange.emit(page);
   }
 
+  // Debounce para no disparar una búsqueda en el servidor en cada tecla presionada.
   onSearchInput(value: string): void {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => this.searchChange.emit(value), 350);

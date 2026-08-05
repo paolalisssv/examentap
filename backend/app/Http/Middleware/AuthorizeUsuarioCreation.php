@@ -22,6 +22,8 @@ class AuthorizeUsuarioCreation
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Mientras el sistema no tenga ningún usuario, esta ruta queda pública para
+        // permitir dar de alta al primer usuario (administrador) sin sesión previa.
         if (! $this->usuarios->any()) {
             $request->attributes->set('bootstrap', true);
 

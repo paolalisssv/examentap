@@ -37,6 +37,8 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
+    // La sesión local se limpia incluso si la petición al backend falla (por ejemplo,
+    // token ya expirado o sin conexión), para no dejar al usuario atrapado.
     return this.api.post<null>(AUTH_ENDPOINTS.logout, {}).pipe(
       map(() => undefined),
       catchError(() => of(undefined)),

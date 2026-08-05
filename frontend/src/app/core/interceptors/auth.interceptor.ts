@@ -22,6 +22,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authorizedRequest).pipe(
     catchError((error: HttpErrorResponse) => {
+      // En login/forgot-password un 401 son credenciales inválidas, no una sesión
+      // expirada, así que no debe forzar un logout ni redirigir.
       if (error.status === 401 && !isPublicAuthRequest) {
         authService.clearSession();
         router.navigate(['/login']);

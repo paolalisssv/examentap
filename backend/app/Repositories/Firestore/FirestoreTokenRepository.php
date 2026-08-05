@@ -17,6 +17,8 @@ class FirestoreTokenRepository implements TokenRepositoryInterface
 
     public function create(string $userId, string $tokenHash, Carbon $expiresAt): void
     {
+        // El hash del token se usa como ID del documento, permitiendo buscarlo
+        // directamente por ID en vez de hacer una query por campo.
         $this->firestore->create($this->collection, [
             'user_id' => $userId,
             'expires_at' => $expiresAt,
@@ -32,6 +34,8 @@ class FirestoreTokenRepository implements TokenRepositoryInterface
             return null;
         }
 
+        // Firestore no expira documentos automáticamente: la vigencia se valida
+        // aquí comparando expires_at contra la hora actual.
         if (! $token['expires_at'] instanceof Carbon || $token['expires_at']->isPast()) {
             return null;
         }
