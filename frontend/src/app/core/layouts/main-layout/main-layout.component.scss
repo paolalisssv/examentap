@@ -13,9 +13,9 @@
   gap: 32px;
 }
 
-.app-title {
-  font-weight: bold;
-  color: #111827;
+.app-logo {
+  height: 36px;
+  width: auto;
 }
 
 .app-nav {
@@ -34,7 +34,7 @@
 }
 
 .app-nav a.active {
-  color: #2563eb;
+  color: var(--color-primary);
   font-weight: 600;
 }
 

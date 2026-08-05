@@ -1,28 +1,25 @@
 .data-table {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  background-color: transparent;
 }
 
 .data-table-toolbar {
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0 0 16px;
 }
 
 .search-input {
   width: 100%;
   max-width: 320px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   box-sizing: border-box;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
 }
 
 .data-table-wrapper {
@@ -31,23 +28,34 @@
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0 10px;
   font-size: 14px;
 }
 
 th,
 td {
-  padding: 10px 16px;
+  padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
   white-space: nowrap;
 }
 
 th {
   background-color: #f9fafb;
-  color: #374151;
+  color: #6b7280;
   font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   user-select: none;
+}
+
+th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+th:last-child {
+  border-radius: 0 10px 10px 0;
 }
 
 th.sortable {
@@ -59,31 +67,76 @@ th.sortable {
   font-size: 11px;
 }
 
-.actions-column {
-  white-space: nowrap;
+/* Cada fila del cuerpo se pinta como una tarjeta flotante independiente:
+   el fondo/sombra se aplica por celda (no por <tr>) para que se renderice
+   de forma consistente en todos los navegadores, con las esquinas exteriores
+   redondeadas solo en la primera y última celda. */
+tbody tr td {
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  color: #374151;
 }
 
-.action-button {
-  padding: 5px 10px;
-  margin-right: 6px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: #ffffff;
-  font-size: 12px;
+tbody tr:hover td {
+  background-color: #fafafa;
+}
+
+tbody tr td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+tbody tr td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.row-plain td,
+.row-plain td:first-child,
+.row-plain td:last-child {
+  border-radius: 10px;
+}
+
+.actions-column {
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.actions-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #6b7280;
   cursor: pointer;
 }
 
-.action-button:hover {
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-button:hover {
   background-color: #f3f4f6;
+  color: #111827;
 }
 
-.action-button--danger {
-  color: #b91c1c;
-  border-color: #fca5a5;
+.icon-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
 }
 
-.action-button--danger:hover {
+.icon-button--danger:hover {
   background-color: #fef2f2;
+  color: #b91c1c;
 }
 
 .empty-state {
@@ -103,12 +156,17 @@ th.sortable {
 }
 
 .data-table-pagination button {
-  padding: 6px 12px;
+  padding: 6px 14px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 999px;
   background-color: #ffffff;
   cursor: pointer;
   font-size: 13px;
+}
+
+.data-table-pagination button:hover:not(:disabled) {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary);
 }
 
 .data-table-pagination button:disabled {

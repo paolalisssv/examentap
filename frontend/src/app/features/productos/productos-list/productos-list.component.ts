@@ -24,7 +24,7 @@ export class ProductosListComponent implements OnInit {
   readonly columns: DataTableColumn<Producto>[] = [
     { field: 'id', label: 'Código', sortable: true },
     { field: 'name', label: 'Nombre', sortable: true },
-    { field: 'precio', label: 'Precio', sortable: true, formatter: (row) => row.precio.toFixed(2) },
+    { field: 'precio', label: 'Precio', sortable: true, formatter: (row) => `$ ${row.precio.toFixed(2)}` },
     {
       field: 'createdAt',
       label: 'Fecha de creación',

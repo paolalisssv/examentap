@@ -43,6 +43,16 @@ export class ProductoFormComponent implements OnInit {
     return this.form.controls.precio;
   }
 
+  // El $ es solo visual (span aparte); el control conserva únicamente el número,
+  // normalizado a dos decimales al salir del campo.
+  formatPrecio(): void {
+    const value = Number(this.precio.value);
+
+    if (this.precio.value !== '' && !Number.isNaN(value)) {
+      this.precio.setValue(value.toFixed(2));
+    }
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
 

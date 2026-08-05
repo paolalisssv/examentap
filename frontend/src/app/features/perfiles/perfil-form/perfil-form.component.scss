@@ -91,7 +91,12 @@ input[readonly] {
 
 input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
+input[type='checkbox'] {
+  accent-color: var(--color-primary);
 }
 
 .field-error {
@@ -128,13 +133,26 @@ input:focus {
   margin-top: 8px;
   border: none;
   border-radius: 6px;
-  background-color: #2563eb;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-primary-contrast);
   font-size: 15px;
   cursor: pointer;
 }
 
+.submit-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.submit-button:active:not(:disabled) {
+  background-color: var(--color-primary-active);
+}
+
+.submit-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
 .submit-button:disabled {
-  background-color: #93c5fd;
+  background-color: var(--color-primary-disabled);
   cursor: not-allowed;
 }

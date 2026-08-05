@@ -66,4 +66,16 @@ export class DataTableComponent<T extends { id: string }> {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => this.searchChange.emit(value), 350);
   }
+
+  onView(row: T): void {
+    this.view.emit(row);
+  }
+
+  onEdit(row: T): void {
+    this.edit.emit(row);
+  }
+
+  onDelete(row: T): void {
+    this.delete.emit(row);
+  }
 }

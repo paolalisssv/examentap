@@ -18,10 +18,18 @@
   box-sizing: border-box;
 }
 
+.auth-logo {
+  display: block;
+  height: 56px;
+  width: auto;
+  margin: 0 auto 20px;
+}
+
 h1 {
   margin: 0 0 8px;
   font-size: 22px;
   color: #111827;
+  text-align: center;
 }
 
 .auth-subtitle {
@@ -69,7 +77,8 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
 }
 
 .field-error {
@@ -84,14 +93,27 @@ input:focus {
   margin-top: 8px;
   border: none;
   border-radius: 6px;
-  background-color: #2563eb;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-primary-contrast);
   font-size: 15px;
   cursor: pointer;
 }
 
+.submit-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.submit-button:active:not(:disabled) {
+  background-color: var(--color-primary-active);
+}
+
+.submit-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
 .submit-button:disabled {
-  background-color: #93c5fd;
+  background-color: var(--color-primary-disabled);
   cursor: not-allowed;
 }
 
@@ -100,7 +122,7 @@ input:focus {
   margin-top: 16px;
   text-align: center;
   font-size: 13px;
-  color: #2563eb;
+  color: var(--color-primary);
   text-decoration: none;
 }
 
